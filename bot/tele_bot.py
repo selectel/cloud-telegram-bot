@@ -40,9 +40,6 @@ def sticker(message):
                      reply_markup=keyboard)
 
 def get_webhook_info(message):
-    # url = f"https://api.telegram.org/bot{TOKEN}/getwebhookinfo"
-    # resp = json.dumps(json.loads(urlopen(url).read().decode("utf-8")), indent=2)
-    # bot.send_message(message.chat.id, resp, reply_to_message_id=message.message_id)
     webhook = bot.get_webhook_info()
     resp = f"""
     URL: {webhook.url}

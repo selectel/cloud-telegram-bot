@@ -9,11 +9,19 @@ import telebot
 # Read constant from environment variables available to edit at my.selectel.ru
 TOKEN = os.environ.get('TOKEN')
 
+HELP_MSG = """
+Commands usage help:
+/start to start
+/sticker to get a sticker :-) It's so simple for now!
+/getwebhook <token of your telegram bot>
+/setwebhook <token of your telegram bot> <url to call on message>
+"""
+
 # Create `bot` instance to use some features from pyTelegramBotAPI package.
 # WARN: Not all of them is useful in serverless architecture.
 bot = telebot.TeleBot(token=TOKEN, threaded=False)
 keyboard = telebot.types.ReplyKeyboardMarkup()
-keyboard.row('/sticker', '/getwebhookinfo')
+keyboard.row('/sticker')
 
 def echo(message, username):
     if message.sticker:
@@ -41,8 +49,9 @@ def sticker(message):
                      reply_to_message_id=message.message_id,
                      reply_markup=keyboard)
 
-def get_webhook_info(message):
-    webhook = bot.get_webhook_info()
+def get_webhook_info(message, token):
+    result = telebot.apihelper.get_webhook_info(token)
+    webhook = telebot.types.WebhookInfo.de_json(result)
     resp = f"""
     URL: {webhook.url}
     Custom certificate: {"Yes" if webhook.has_custom_certificate else "No"}
@@ -70,15 +79,19 @@ def route_command(command, message):
     Commands router.
     """
     if command == '/start':
-        start(message)
+        return start(message)
     elif command == '/sticker':
-        sticker(message)
-    elif command == '/getwebhookinfo':
-        get_webhook_info(message)
+        return sticker(message)
     else:
         match = re.search(r'/setwebhook\s(\d+:[a-zA-Z0-9-]+)\s(https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+/.*)', message.text)
         if match and match[1] and match[2]:
-            set_webhook_info(message, token=match[1], url=match[2])
+            return set_webhook_info(message, token=match[1], url=match[2])
+        match = re.search(r'/getwebhook\s(\d+:[a-zA-Z0-9-]+)', message.text)
+        if match and match[1]:
+            return get_webhook_info(message, token=match[1])
+    bot.send_message(message.chat.id, "Unknown command, sorry. " + HELP_MSG,
+                     reply_to_message_id=message.message_id,
+                     reply_markup=keyboard)
 
 def main(**kwargs):
     """

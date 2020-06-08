@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
 import random
+import re
+import json
 
 import telebot
 
@@ -54,6 +56,15 @@ def get_webhook_info(message):
                      reply_to_message_id=message.message_id,
                      reply_markup=keyboard)
 
+def set_webhook_info(message, token, url):
+    try:
+        resp = telebot.apihelper.set_webhook(token, url, max_connections=100)
+    except telebot.apihelper.ApiException as e:
+        resp = str(e)
+    bot.send_message(message.chat.id, json.dumps(resp, indent=2),
+                     reply_to_message_id=message.message_id,
+                     reply_markup=keyboard)
+
 def route_command(command, message):
     """
     Commands router.
@@ -64,6 +75,10 @@ def route_command(command, message):
         sticker(message)
     elif command == '/getwebhookinfo':
         get_webhook_info(message)
+    else:
+        match = re.search(r'/setwebhook\s(\d+:[a-zA-Z0-9-]+)\s(https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+/.*)', message.text)
+        if match and match[1] and match[2]:
+            set_webhook_info(message, token=match[1], url=match[2])
 
 def main(**kwargs):
     """

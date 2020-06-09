@@ -100,8 +100,8 @@ def main(**kwargs):
     print(f'Received: "{kwargs}"')
     message = telebot.types.Update.de_json(kwargs)
     message = message.message
-    print(f'Echo on "{message.text}"')
     if message.text and message.text[0] == '/':
+        print(f'Echo on "{message.text}"')
         route_command(message.text.lower(), message)
     else:
         echo(message, message.chat.username)

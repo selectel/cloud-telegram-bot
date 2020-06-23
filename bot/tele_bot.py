@@ -21,7 +21,7 @@ Commands usage help:
 # WARN: Not all of them is useful in serverless architecture.
 bot = telebot.TeleBot(token=TOKEN, threaded=False)
 keyboard = telebot.types.ReplyKeyboardMarkup()
-keyboard.row('/sticker')
+keyboard.row('/sticker', '/start')
 
 def echo(message, username):
     if message.sticker:
@@ -33,8 +33,10 @@ def echo(message, username):
                          reply_to_message_id=message.message_id)
 
 def start(message):
-    bot.send_message(message.chat.id, "Hi! Let's start /start",
-                     reply_to_message_id=message.message_id,
+    msg = "Hi! To make your own bot, please, open https://github.com/selectel/cloud-telegram-bot and follow " \
+          "instructions 👍"
+    bot.send_message(message.chat.id, msg, reply_to_message_id=message.message_id)
+    bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAIFDl7xtT4y70yc908hzCAI_ojAJR_-AAJ_BwACuSURSJsLZWr1VtxYGgQ",
                      reply_markup=keyboard)
 
 def sticker(message):
@@ -99,8 +101,8 @@ def main(**kwargs):
     """
     print(f'Received: "{kwargs}"')
     message = telebot.types.Update.de_json(kwargs)
-    message = message.message
-    if message.text and message.text[0] == '/':
+    message = message.message or message.edited_message
+    if message and message.text and message.text[0] == '/':
         print(f'Echo on "{message.text}"')
         route_command(message.text.lower(), message)
     else:

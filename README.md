@@ -1,6 +1,7 @@
 # Cloud Telegram Bot
 
 -1. Find @BotFather in Telegram and send them "/newbot" and name of your new bot after that
+
 0. Remember token of your bot
 1. Download this repo as ZIP
 2. Unpack
